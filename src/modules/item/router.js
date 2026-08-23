@@ -1,10 +1,12 @@
-//import * as itemController from "./controller.js";
+import * as itemController from "./controller.js";
+import upload from "../../config/multer.js";
+
 import express from "express";
 
 const router = express.Router();
 
-//router.post("/");
-//router.post("/:itemId/photos");
+router.post("/", itemController.addItem);
+router.post("/:itemId/photos", upload.array("photos"), itemController.upload);
 //router.patch("/:itemId");
 
 //router.delete("/:itemId/photos/:photoId");
@@ -13,7 +15,6 @@ const router = express.Router();
 //router.get("/scan");
 //router.get("/:itemId");
 //router.get("/");
-
 
 export default router;
 

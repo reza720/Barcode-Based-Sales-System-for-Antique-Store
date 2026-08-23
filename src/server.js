@@ -1,4 +1,4 @@
-/*import sequelize from "../src/config/sequelize.js";
+import sequelize from "../src/config/sequelize.js";
 import env from "../src/config/env.js"; 
 import app from "./app.js";
 
@@ -18,5 +18,3 @@ import app from "./app.js";
         process.exit(1);
     }
 })();
-
-*/
