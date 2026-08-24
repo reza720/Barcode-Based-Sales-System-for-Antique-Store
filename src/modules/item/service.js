@@ -2,12 +2,12 @@ import Item from "./models/item.js";
 import Photo from "./models/photo.js";
 import deleteFile from "../../utils/deleteFile.js";
 import throwErrror from "../../utils/throwError.js";
-import { Model, Op } from "sequelize";
+import { Op } from "sequelize";
 import bwip from "bwip-js";
 import crypto from "node:crypto";
 import path from "node:path";
 import fs from "node:fs/promises";
-import { describe, it } from "node:test";
+
 
 // add item
 // input: name, description, price
