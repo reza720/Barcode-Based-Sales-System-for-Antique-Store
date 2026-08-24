@@ -5,16 +5,26 @@ import express from "express";
 
 const router = express.Router();
 
-router.post("/", itemController.addItem);
-router.post("/:itemId/photos", upload.array("photos"), itemController.upload);
-//router.patch("/:itemId");
+router.post("/", 
+    itemController.addItem);
+router.post("/:itemId/photos", 
+    upload.array("photos"), 
+    itemController.upload);
+router.patch("/:itemId", 
+    itemController.update);
 
-//router.delete("/:itemId/photos/:photoId");
-//router.delete("/:itemId");
+router.delete("/:itemId/photos/:photoId", 
+    itemController.deletePhoto);
+router.delete("/:itemId", 
+    itemController.deleteItem);
 
-//router.get("/scan");
-//router.get("/:itemId");
-//router.get("/");
+router.get("/scan", 
+    itemController.scan);
+router.get("/:itemId", 
+    itemController.getItem);
+router.get("/", 
+    itemController.getItems
+);
 
 export default router;
 
