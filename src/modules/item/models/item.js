@@ -3,8 +3,8 @@ import { DataTypes } from "sequelize";
     
 const Item = sequelize.define("Item", {
     id:{
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
         primaryKey: true
     },
     barcode:{
