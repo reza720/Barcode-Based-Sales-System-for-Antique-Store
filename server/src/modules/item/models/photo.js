@@ -9,7 +9,7 @@ const Photo = sequelize.define("Photo", {
         primaryKey: true
     },
     itemId:{
-        type:DataTypes.INTEGER,
+        type:DataTypes.UUID,
         allowNull: false
     },
     path:{
