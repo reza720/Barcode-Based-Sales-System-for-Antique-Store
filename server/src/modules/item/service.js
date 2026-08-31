@@ -50,168 +50,6 @@ export async function addItem({name, description, price}) {
     }
 };
 
-// upload photos
-// input: itemId, photos
-// If item exist
-// If photos exist
-// Create Bulk photo model
-// if DB fails delete the photos
-// return: item data + photos paths
-export async function upload(itemId, files) {
-    try{
-        const item = await Item.findByPk(itemId);
-        if(!item) throwErrror("Item not found", 404);
-        if(!files || files.length === 0) throwErrror("Files are not added", 400);
-
-        const photos = await Photo.bulkCreate(
-            files.map(file => ({
-                itemId,
-                path: file.path
-            }))
-        );
-
-        return {
-            id: item.id,
-            name: item.name,
-            photos: photos.map(photo => ({
-                id: photo.id,
-                path: photo.path
-            }))
-        }
-    }
-    catch(err){
-        if(files){
-            for (const file of files){
-                await deleteFile(file.path);
-            }
-        }
-        throw err;
-    }
-};
-
-// update item
-// input: itemId, data
-// if item exist
-// Update in db the item model
-// return: item data
-export async function update(itemId, data) {
-    if(!data || Object.keys(data).length === 0) throwErrror("No data is added", 400);
-
-    const item = await Item.findByPk(itemId);
-    if(!item) throwErrror("Item not found", 404);
-
-    const updatedData = {};
-    if(data.name !== undefined){
-        updatedData.name = data.name
-    }
-    if(data.description !== undefined){
-        updatedData.description = data.description
-    }
-    if(data.price !== undefined){
-        updatedData.price = data.price
-    }
-    await item.update(updatedData);
-
-    return{
-        id: item.id,
-        name: item.name,
-        description: item.description,
-        price: item.price
-    }
-};
-
-// Delete a photo
-// input: itemId, photoId
-// if item exist
-// if photo exist
-// delete photo model
-// delet photo in storage
-export async function deletePhoto(itemId, photoId) {
-    const photo = await Photo.findOne({
-        where:{
-            id: photoId,
-            itemId
-        }
-    });
-
-    if(!photo) throwErrror("Photo not found", 404);
-
-    await photo.destroy();
-    await deleteFile(photo.path);
-}
-
-// Delete an Item
-// input: itemId
-// if Item exist
-// delete item model
-// Delete the photos in storage
-export async function deleteItem(itemId){
-    const item = await Item.findByPk(itemId);
-    if(!item) throwErrror("Item not found", 404);
-
-    const photos = await Photo.findAll({
-        where:{itemId}
-    });
-    
-    await item.destroy();
-    
-    await deleteFile(item.barcodePath);
-
-    if(photos.length !== 0){
-        for(const photo of photos){
-            await deleteFile(photo.path);
-        }
-    }
-};
-
-// Scan
-// input: barcode Code
-// if Item exist
-// return: item data 
-export async function scan(barcode) {
-    console.log("barcode received");
-    console.log("barcode type:", typeof barcode);
-    const item = await Item.findOne({
-        where: {barcode},
-    });
-    console.log("item searched");
-    if(!item) throwErrror("Item not found", 404);
-    console.log("item found");
-    return {
-        id: item.id,
-        name: item.name,
-        description: item.description,
-        price: item.price
-    }
-}
-
-// Get an Item
-// input: itemId
-// if item exist
-// return: item data + photos paths
-export async function getItem(itemId) {
-    const item = await Item.findByPk(itemId,{
-        attributes:[
-            "id",
-            "name",
-            "description",
-            "price"
-        ],
-        include:[
-            {
-                model: Photo,
-                attributes:[
-                    "path"
-                ]
-            }
-        ]
-    });
-
-    if(!item) throwErrror("Item not found", 404);
-
-    return item;
-};
-
 // get item collection
 // support: pagaintaion
 // suport: Search by (name)
@@ -254,20 +92,10 @@ export async function getItems(options = {}) {
         attributes:[
             "id",
             "name",
-            "description",
             "price"
         ],
-        include:[
-            {
-                model: Photo,
-                attributes:[
-                    "path"
-                ]
-            }
-        ],
         limit,
-        offset,
-        distinct: true
+        offset
     });
 
     return {
@@ -280,6 +108,210 @@ export async function getItems(options = {}) {
         }
     }
 };
+
+// Scan
+// input: barcode Code
+// if Item exist
+// return: item data 
+export async function scanBarcode(barcode) {
+    const item = await Item.findOne({
+        where: { barcode },
+        attributes: [
+            "id",
+            "name",
+            "description",
+            "price",
+            "barcodePath"
+        ],
+        include: [
+            {
+                model: Photo,
+                attributes: [
+                    "id",
+                    "path"
+                ]
+            }
+        ]
+    });
+    if (!item) throwError("Item not found", 404);
+
+    return item;
+}
+
+// upload photos
+// input: itemId, photos
+// If item exist
+// If photos exist
+// Create Bulk photo model
+// if DB fails delete the photos
+// return: item data + photos paths
+export async function uploadPhotos(itemId, files) {
+    try{
+        const item = await Item.findByPk(itemId);
+        if(!item) throwErrror("Item not found", 404);
+        if(!files || files.length === 0) throwErrror("Files are not added", 400);
+
+        const photos = await Photo.bulkCreate(
+            files.map(file => ({
+                itemId,
+                path: file.path
+            }))
+        );
+
+        return {
+            photos: photos.map(photo => ({
+                id: photo.id,
+                path: photo.path
+            }))
+        }
+    }
+    catch(err){
+        if(files){
+            for (const file of files){
+                await deleteFile(file.path);
+            }
+        }
+        throw err;
+    }
+};
+
+// Regenreate Barcode for existences Item
+// inut: itemId
+// return: barcode path
+export async function generateBarcode(itemId) {
+    let filepath;
+    try {
+        const item = await Item.findByPk(itemId);
+        if (!item) throwError("Item not found", 404);
+
+        const { code, pngBuffer } = await generateBarcodeImage();
+        const filename = `${item.name}.${Date.now()}.png`;
+        filepath = path.join(
+            process.cwd(),
+            "storage",
+            "barcodes",
+            filename
+        );
+        await fs.writeFile(filepath, pngBuffer);
+
+        const oldFilepath = item.barcodePath;
+
+        await item.update({
+            barcode: code,
+            barcodePath: filepath
+        });
+
+        if (oldFilepath) await deleteFile(oldFilepath);
+
+        return {
+            barcodePath: item.barcodePath
+        };
+    } catch (err) {
+        if (filepath) {
+            await deleteFile(filepath);
+        }
+        throw err;
+    }
+};
+
+// Delete a photo
+// input: itemId, photoId
+// if item exist
+// if photo exist
+// delete photo model
+// delet photo in storage
+export async function deletePhoto(photoId) {
+    const photo = await Photo.findByPk(photoId);
+    if(!photo) throwErrror("Photo not found", 404);
+
+    await photo.destroy();
+    await deleteFile(photo.path);
+}
+
+// update item
+// input: itemId, data
+// if item exist
+// Update in db the item model
+// return: item data
+export async function updateItem(itemId, data) {
+    if(!data || Object.keys(data).length === 0) throwErrror("No data is added", 400);
+
+    const item = await Item.findByPk(itemId);
+    if(!item) throwErrror("Item not found", 404);
+
+    const updatedData = {};
+    if(data.name !== undefined){
+        updatedData.name = data.name
+    }
+    if(data.description !== undefined){
+        updatedData.description = data.description
+    }
+    if(data.price !== undefined){
+        updatedData.price = data.price
+    }
+    await item.update(updatedData);
+
+    return{
+        id: item.id,
+        name: item.name,
+        description: item.description,
+        price: item.price
+    }
+};
+
+// Delete an Item
+// input: itemId
+// if Item exist
+// delete item model
+// Delete the photos in storage
+export async function deleteItem(itemId){
+    const item = await Item.findByPk(itemId);
+    if(!item) throwErrror("Item not found", 404);
+
+    const photos = await Photo.findAll({
+        where:{itemId}
+    });
+    
+    await item.destroy();
+    
+    await deleteFile(item.barcodePath);
+
+    if(photos.length !== 0){
+        for(const photo of photos){
+            await deleteFile(photo.path);
+        }
+    }
+};
+
+// Get an Item
+// input: itemId
+// if item exist
+// return: item data + photos paths
+export async function getItem(itemId) {
+    const item = await Item.findByPk(itemId,{
+        attributes:[
+            "id",
+            "name",
+            "description",
+            "price",
+            "barcodePath"
+        ],
+        include:[
+            {
+                model: Photo,
+                attributes:[
+                    "id",
+                    "path"
+                ]
+            }
+        ]
+    });
+
+    if(!item) throwErrror("Item not found", 404);
+
+    return item;
+};
+
 
 
 // ---------- Helpers -------------

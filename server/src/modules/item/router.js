@@ -6,24 +6,32 @@ import express from "express";
 const router = express.Router();
 
 router.post("/", 
-    itemController.addItem);
-router.post("/:itemId/photos", 
-    upload.array("photos"), 
-    itemController.upload);
-router.patch("/:itemId", 
-    itemController.update);
-
-router.delete("/:itemId/photos/:photoId", 
-    itemController.deletePhoto);
-router.delete("/:itemId", 
-    itemController.deleteItem);
-
-router.get("/scan", 
-    itemController.scan);
-router.get("/:itemId", 
-    itemController.getItem);
+    itemController.addItem
+);
 router.get("/", 
     itemController.getItems
+);
+router.get("/scan", 
+    itemController.scanBarcode
+);
+router.post("/:itemId/photos", 
+    upload.array("photos"), 
+    itemController.uploadPhotos
+);
+router.post("/:itemId/barcode", 
+    itemController.generateBarcode
+);
+router.delete("/photos/:photoId", 
+    itemController.deletePhoto
+);
+router.patch("/:itemId", 
+    itemController.updateItem
+);
+router.delete("/:itemId", 
+    itemController.deleteItem
+);
+router.get("/:itemId", 
+    itemController.getItem
 );
 
 export default router;

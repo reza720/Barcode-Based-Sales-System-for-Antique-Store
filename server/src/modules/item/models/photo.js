@@ -4,8 +4,8 @@ import Item from "./item.js";
 
 const Photo = sequelize.define("Photo", {
     id: {
-        type:DataTypes.INTEGER,
-        autoIncrement: true,
+        type:DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
         primaryKey: true
     },
     itemId:{
