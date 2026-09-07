@@ -1,19 +1,17 @@
-import sequelize from "../src/config/sequelize.js";
-import env from "../src/config/env.js"; 
-import app from "./app.js";
+import sequelize from '../src/config/sequelize.js';
+import env from '../src/config/env.js';
+import app from './app.js';
 
-( async() => {
-    try{
+(async () => {
+    try {
         await sequelize.authenticate();
         await sequelize.sync();
-        console.log("DB connected");
+        console.log('DB connected');
 
-    app.listen(env.server.port, ()=>{
-        console.log("Server is Running");
-    })
-        
-    }
-    catch(err){
+        app.listen(env.server.port, () => {
+            console.log('Server is Running');
+        });
+    } catch (err) {
         console.error(err);
         process.exit(1);
     }

@@ -1,8 +1,8 @@
-function globalErrorHandler(err, req, res, next){
+function globalErrorHandler(err, req, res, next) {
     res.status(err.status || 500).json({
         success: false,
-        message: err.message || "Internal Server Error",
-        errors: err.errors || []        
+        message: err.message || 'Internal Server Error',
+        errors: err.errors || [],
     });
 }
 

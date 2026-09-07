@@ -1,26 +1,26 @@
-import Sale from "./models/sale.js";
-import SaleItem from "./models/saleItem.js";
-import sequelize from "../../config/sequelize.js";
-import throwError from "../../utils/throwError.js";
-import Item from "../item/models/item.js";
-import { TICK_CHAR } from "sequelize/lib/utils";
+import Sale from './models/sale.js';
+import SaleItem from './models/saleItem.js';
+import sequelize from '../../config/sequelize.js';
+import throwError from '../../utils/throwError.js';
+import Item from '../item/models/item.js';
+import { TICK_CHAR } from 'sequelize/lib/utils';
 
 // Create sale
 // input: saleData not item added initailly
 // destructure the data
 // return: sale data
-export async function createSale({customerName, customerPhone}) {
+export async function createSale({ customerName, customerPhone }) {
     const sale = await Sale.create({
         customerName,
-        customerPhone
+        customerPhone,
     });
 
     return {
         saleId: sale.id,
         customerName: sale.customerName,
         customerPhone: sale.customerPhone,
-        saleDate: sale.date
-    }
+        saleDate: sale.date,
+    };
 }
 
 // get sales
@@ -28,47 +28,42 @@ export async function createSale({customerName, customerPhone}) {
 // queries: search by customerName, itemName
 //          sort by date (defualt)
 //          pagination
-//          
+//
 // return: rows + paginaton data
 
 // get Sale
 // input: saleId
 // if sale exist
-// get items if exist 
+// get items if exist
 // return sale data, items data, total
 export async function getSale(saleId) {
-    const sale = await Sale.findByPk(saleId,{
-        include:[
+    const sale = await Sale.findByPk(saleId, {
+        include: [
             {
                 model: SaleItem,
-                include:[
+                include: [
                     {
                         model: Item,
-                        attributes:[
-                            "id",
-                            "name",
-                            "description",
-                            "price"
-                        ]
-                    }
-                ]
-            }
-        ]
+                        attributes: ['id', 'name', 'description', 'price'],
+                    },
+                ],
+            },
+        ],
     });
-    if(!sale) throwError("Sale not found", 404);
+    if (!sale) throwError('Sale not found', 404);
 
-    const items = sale.SaleItems.map(saleItem => saleItem.Item);
-    const total = items.reduce((sum, item) => sum + Number(item.price),0);
-    
+    const items = sale.SaleItems.map((saleItem) => saleItem.Item);
+    const total = items.reduce((sum, item) => sum + Number(item.price), 0);
+
     return {
         saleId: sale.id,
         customerName: sale.customerName,
         customerPhone: sale.customerPhone,
         saleDate: sale.date,
         items,
-        total
-    }
-};
+        total,
+    };
+}
 
 // update Sale
 // input: saleId, data
@@ -77,19 +72,16 @@ export async function getSale(saleId) {
 // return: sale data, items data, total
 export async function updateSale(saleId, data) {
     const sale = await Sale.findByPk(saleId);
-    if(!sale) throwError("Sale not found", 404);
+    if (!sale) throwError('Sale not found', 404);
 
-    if(!data) throwError("No data is provided", 400);
-    const {
-        customerName,
-        customerPhone
-    } = data;
+    if (!data) throwError('No data is provided', 400);
+    const { customerName, customerPhone } = data;
 
     const updatedData = {};
-    if(customerName !== undefined){
+    if (customerName !== undefined) {
         updatedData.customerName = customerName;
     }
-    if(customerPhone !== undefined){
+    if (customerPhone !== undefined) {
         updatedData.customerPhone = customerPhone;
     }
 
@@ -99,9 +91,9 @@ export async function updateSale(saleId, data) {
         saleId: sale.id,
         customerName: sale.customerName,
         customerPhone: sale.customerPhone,
-        saleDate: sale.date
-    }
-};
+        saleDate: sale.date,
+    };
+}
 
 // delete sale
 // input: saleId
@@ -109,7 +101,7 @@ export async function updateSale(saleId, data) {
 // return: nothing
 export async function deleteSale(saleId) {
     const sale = await Sale.findByPk(saleId);
-    if(!sale) throwError("Sale not found", 404);
+    if (!sale) throwError('Sale not found', 404);
 
     await sale.destroy();
 }
@@ -124,37 +116,37 @@ export async function deleteSale(saleId) {
 
 export async function addItemToSale(saleId, itemId) {
     if (!itemId) {
-        throwError("Item ID is required", 400);
+        throwError('Item ID is required', 400);
     }
 
     const sale = await Sale.findByPk(saleId);
     if (!sale) {
-        throwError("Sale not found", 404);
+        throwError('Sale not found', 404);
     }
 
     const item = await Item.findByPk(itemId);
     if (!item) {
-        throwError("Item not found", 404);
+        throwError('Item not found', 404);
     }
 
     await isItemSold(itemId);
 
     const saleItem = await SaleItem.create({
         itemId,
-        saleId
+        saleId,
     });
 
     return {
         itemId: saleItem.itemId,
-        saleId: saleItem.saleId
+        saleId: saleItem.saleId,
     };
 }
 
 async function isItemSold(itemId) {
     const saleItem = await SaleItem.findOne({
         where: {
-            itemId
-        }
+            itemId,
+        },
     });
 
     if (saleItem) {
@@ -170,14 +162,13 @@ async function isItemSold(itemId) {
 // return: nothing
 export async function deleteItemOfSale(saleId, itemId) {
     const saleItem = await SaleItem.findOne({
-        where:{
+        where: {
             saleId,
-            itemId
-        }
+            itemId,
+        },
     });
 
-    if(!saleItem) throwError("Item is not added to sale", 404);
+    if (!saleItem) throwError('Item is not added to sale', 404);
 
-    await saleItem.destroy()
-};
-
+    await saleItem.destroy();
+}

@@ -1,27 +1,31 @@
-import sequelize from "../../../config/sequelize.js";
-import { DataTypes } from "sequelize";
+import sequelize from '../../../config/sequelize.js';
+import { DataTypes } from 'sequelize';
 
-const Sale = sequelize.define("Sale", {
-    id: {
-        type:DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
-        primaryKey: true
+const Sale = sequelize.define(
+    'Sale',
+    {
+        id: {
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
+            primaryKey: true,
+        },
+        customerName: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        customerPhone: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        date: {
+            type: DataTypes.DATEONLY,
+            allowNull: false,
+            defaultValue: DataTypes.NOW,
+        },
     },
-    customerName:{
-        type:DataTypes.STRING,
-        allowNull: false
-    },
-    customerPhone:{
-        type:DataTypes.STRING,
-        allowNull: true
-    },
-    date: {
-        type:DataTypes.DATEONLY,
-        allowNull: false,
-        defaultValue: DataTypes.NOW
+    {
+        timestamps: true,
     }
-},{
-    timestamps: true
-});
+);
 
 export default Sale;
