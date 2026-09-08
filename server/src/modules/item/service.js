@@ -1,7 +1,7 @@
 import Item from './models/item.js';
 import Photo from './models/photo.js';
 import deleteFile from '../../utils/deleteFile.js';
-import throwErrror from '../../utils/throwError.js';
+import throwError from '../../utils/throwError.js';
 import { Op } from 'sequelize';
 import bwip from 'bwip-js';
 import crypto from 'node:crypto';
@@ -127,8 +127,8 @@ export async function scanBarcode(barcode) {
 export async function uploadPhotos(itemId, files) {
     try {
         const item = await Item.findByPk(itemId);
-        if (!item) throwErrror('Item not found', 404);
-        if (!files || files.length === 0) throwErrror('Files are not added', 400);
+        if (!item) throwError('Item not found', 404);
+        if (!files || files.length === 0) throwError('Files are not added', 400);
 
         const photos = await Photo.bulkCreate(
             files.map((file) => ({
@@ -195,7 +195,7 @@ export async function regenerateBarcode(itemId) {
 // delet photo in storage
 export async function deletePhoto(photoId) {
     const photo = await Photo.findByPk(photoId);
-    if (!photo) throwErrror('Photo not found', 404);
+    if (!photo) throwError('Photo not found', 404);
 
     await photo.destroy();
     await deleteFile(photo.path);
@@ -207,10 +207,10 @@ export async function deletePhoto(photoId) {
 // Update in db the item model
 // return: item data
 export async function updateItem(itemId, data) {
-    if (!data || Object.keys(data).length === 0) throwErrror('No data is added', 400);
+    if (!data || Object.keys(data).length === 0) throwError('No data is added', 400);
 
     const item = await Item.findByPk(itemId);
-    if (!item) throwErrror('Item not found', 404);
+    if (!item) throwError('Item not found', 404);
 
     const updatedData = {};
     if (data.name !== undefined) {
@@ -238,7 +238,7 @@ export async function updateItem(itemId, data) {
 // Delete the photos in storage
 export async function deleteItem(itemId) {
     const item = await Item.findByPk(itemId);
-    if (!item) throwErrror('Item not found', 404);
+    if (!item) throwError('Item not found', 404);
 
     const photos = await Photo.findAll({
         where: { itemId },
@@ -270,7 +270,7 @@ export async function getItem(itemId) {
         ],
     });
 
-    if (!item) throwErrror('Item not found', 404);
+    if (!item) throwError('Item not found', 404);
 
     return item;
 }

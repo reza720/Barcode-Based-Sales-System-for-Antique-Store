@@ -1,9 +1,7 @@
 import Sale from './models/sale.js';
 import SaleItem from './models/saleItem.js';
-import sequelize from '../../config/sequelize.js';
 import throwError from '../../utils/throwError.js';
 import Item from '../item/models/item.js';
-import { TICK_CHAR } from 'sequelize/lib/utils';
 
 // Create sale
 // input: saleData not item added initailly

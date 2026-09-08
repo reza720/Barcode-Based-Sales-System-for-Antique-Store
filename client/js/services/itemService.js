@@ -3,7 +3,7 @@ import * as api from "./api.js";
 const Item_URL = "/items";
 
 // get Items
-async function getItems(params = {}) {
+export function getItems(params = {}) {
     const query = new URLSearchParams();
 
     Object.entries(params).forEach(([key, value]) => {
@@ -13,23 +13,23 @@ async function getItems(params = {}) {
     });
 
     const queryString = query.toString();
-    const endpoint = queryString ? `${ITEM_URL}?${queryString}` : ITEM_URL;
+    const endpoint = queryString ? `${Item_URL}?${queryString}` : Item_URL;
 
     return api.get(endpoint);
 }
 
 // create Item
-async function createItem(itemData) {
+export function createItem(itemData) {
     return api.post(Item_URL, itemData);
 }
 
 // Scan Item
-async function scan(barcode) {
+export function scan(barcode) {
     return api.post(`${Item_URL}/scan`, barcode);
 }
 
 // upload photos
-async function upload(itemId, files) {
+export function upload(itemId, files) {
     const formData = new FormData();
 
     for(const file of files){
@@ -38,3 +38,28 @@ async function upload(itemId, files) {
 
     return api.upload(`${Item_URL}/${itemId}/photos`, formData);
 };
+
+// Generate barcode
+export function regenerateBarcode(itemId) {
+    return api.post(`${Item_URL}/${itemId}/barcode`);
+}
+
+// delete photo
+export function deletePhoto(photoId){
+    return api.del(`${Item_URL}/photos/${photoId}`);
+}
+
+// update Item
+export function updateItem(itemId, data){
+    return api.patch(`${Item_URL}/${itemId}`, data);
+}
+
+// delete Item
+export function deleteItem(itemId){
+    return api.del(`${Item_URL}/${itemId}`);
+}
+
+// get Item
+export function getItem(itemId){
+    return api.get(`${Item_URL}/${itemId}`);
+}

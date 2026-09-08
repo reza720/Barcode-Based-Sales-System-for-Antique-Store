@@ -30,18 +30,6 @@ export async function post(endpoint, data) {
     });
 };
 
-// put
-export async function put(endpoint, data) {
-    return request(endpoint, {
-        method: "PUT",
-        headers:{
-            "Content-Type": "application/json",
-            Accept: "application/json"
-        },
-        body: JSON.stringify(data)
-    });
-};
-
 // patch
 export async function patch(endpoint, data) {
     return request(endpoint, {
