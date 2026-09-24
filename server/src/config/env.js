@@ -20,9 +20,6 @@ const env = {
         host: process.env.DB_HOST,
         timeZone: process.env.DB_TIMEZONE,
     },
-    jwt: {
-        accessToken: process.env.ACCESS_TOKEN,
-    },
 };
 
 export default env;

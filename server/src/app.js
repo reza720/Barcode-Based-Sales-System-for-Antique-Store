@@ -12,7 +12,7 @@ app.use(hpp());
 app.use(helmet());
 app.use(cookieParser());
 
-app.use('/api', v1Router);
+app.use('/api/v1', v1Router);
 
 app.use((res) => {
     res.status(404).json({
