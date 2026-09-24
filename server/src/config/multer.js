@@ -3,16 +3,16 @@ import crypto from 'node:crypto';
 import path from 'node:path';
 
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
+    destination: (_req, _file, cb) => {
         cb(null, 'storage/photos');
     },
-    filename: (req, file, cb) => {
+    filename: (_req, file, cb) => {
         const ext = path.extname(file.originalname);
         cb(null, `${crypto.randomUUID()}.${Date.now()}.${ext}`);
     },
 });
 
-const fileFilter = (req, file, cb) => {
+const fileFilter = (_req, file, cb) => {
     const allowedTypes = ['image/jpeg', 'image/png'];
     if (allowedTypes.includes(file.mimetype)) {
         cb(null, true);
