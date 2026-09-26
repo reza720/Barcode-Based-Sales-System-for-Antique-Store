@@ -8,12 +8,15 @@ import crypto from 'node:crypto';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 
-// add item
-// input: name, description, price
-// Generate Barcode
-// Create Item table
-// if DB fails delete the barcode
-// return id, barcodePath, name, description, price
+/**
+ * Add Item and generate a barcode for it
+ *
+ * @param {Object} Item
+ * @param {string} Item.name
+ * @param {string | null} Item.description
+ * @param {number} Item.price
+ * @returns {Promise<Object>} The created Item
+ */
 export async function addItem({ name, description = null, price }) {
     let filepath;
     try {
@@ -48,15 +51,13 @@ export async function addItem({ name, description = null, price }) {
     }
 }
 
-// get item collection
-// support: pagaintaion
-// suport: Search by (name)
-// support: Filter by price range
-// input: options(page, limit, search, minPrice, maxPrice)
-// destructure the options
-// Create where (search and filter), offset
-// fetch rows and count
-// return: rows, pagination metadata
+/**
+ * Retrieve list of items
+ *
+ * @param {Object} options - Query paramaters
+ * @returns {Promise<Object>} - Paginated list of items
+ */
+
 export async function getItems(options = {}) {
     const { page = 1, limit = 10, search, minPrice, maxPrice } = options;
 
@@ -97,10 +98,13 @@ export async function getItems(options = {}) {
     };
 }
 
-// Scan
-// input: barcode Code
-// if Item exist
-// return: item data
+/**
+ * Retrieve item data by scanning its barcode
+ *
+ * @param {string} barcode - Barcode value
+ * @returns {Promise<Object>} - Item data
+ */
+
 export async function scanBarcode(barcode) {
     const item = await Item.findOne({
         where: { barcode },
@@ -117,13 +121,14 @@ export async function scanBarcode(barcode) {
     return item;
 }
 
-// upload photos
-// input: itemId, photos
-// If item exist
-// If photos exist
-// Create Bulk photo model
-// if DB fails delete the photos
-// return: item data + photos paths
+/**
+ * Upload item photos
+ *
+ * @param {string} itemId
+ * @param {Object[]} files - Uploaded photos files
+ * @returns {Promise<Object>} - Uploaded photos IDs and paths
+ */
+
 export async function uploadPhotos(itemId, files) {
     try {
         const item = await Item.findByPk(itemId);
@@ -153,9 +158,12 @@ export async function uploadPhotos(itemId, files) {
     }
 }
 
-// Regenreate Barcode for existences Item
-// inut: itemId
-// return: barcode path
+/**
+ * Regenerate item barcode
+ *
+ * @param {string} itemId
+ * @returns {Promise<Object>} - Generated barcode path
+ */
 export async function regenerateBarcode(itemId) {
     let filepath;
     try {
@@ -187,12 +195,12 @@ export async function regenerateBarcode(itemId) {
     }
 }
 
-// Delete a photo
-// input: itemId, photoId
-// if item exist
-// if photo exist
-// delete photo model
-// delet photo in storage
+/**
+ * Delete item photo
+ *
+ * @param {string} photoId
+ * @returns {Primise<void>}
+ */
 export async function deletePhoto(photoId) {
     const photo = await Photo.findByPk(photoId);
     if (!photo) throwError('Photo not found', 404);
@@ -201,11 +209,13 @@ export async function deletePhoto(photoId) {
     await deleteFile(photo.path);
 }
 
-// update item
-// input: itemId, data
-// if item exist
-// Update in db the item model
-// return: item data
+/**
+ * Update item data
+ *
+ * @param {string} itemId
+ * @param {Object} data - Item data to update
+ * @returns {Promise<Object>} - Updated item data
+ */
 export async function updateItem(itemId, data) {
     if (!data || Object.keys(data).length === 0) throwError('No data is added', 400);
 
@@ -231,11 +241,12 @@ export async function updateItem(itemId, data) {
     };
 }
 
-// Delete an Item
-// input: itemId
-// if Item exist
-// delete item model
-// Delete the photos in storage
+/**
+ * Delete item
+ *
+ * @param {string} itemId
+ * @returns {Promise<void>}  
+ */
 export async function deleteItem(itemId) {
     const item = await Item.findByPk(itemId);
     if (!item) throwError('Item not found', 404);
@@ -255,10 +266,12 @@ export async function deleteItem(itemId) {
     }
 }
 
-// Get an Item
-// input: itemId
-// if item exist
-// return: item data + photos paths
+/**
+ * Retrieve item data
+ *
+ * @param {string} itemId
+ * @returns {Promise<Object>} - Item data
+ */
 export async function getItem(itemId) {
     const item = await Item.findByPk(itemId, {
         attributes: ['id', 'name', 'description', 'price', 'barcodePath'],
@@ -276,7 +289,12 @@ export async function getItem(itemId) {
 }
 
 // ---------- Helpers -------------
-// generate Barcode
+
+/**
+ * Generate a barcode
+ *
+ * @returns {Object} - Generated barcode and PNG buffer
+ */
 async function generateBarcode() {
     const code = crypto.randomBytes(5).toString('hex');
     const pngBuffer = await bwip.toBuffer({

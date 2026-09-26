@@ -1,8 +1,6 @@
 import * as itemService from './service.js';
 
-// add Item
-// req: from body
-// res: status, json(success, message, returned data)
+// Add item
 export async function addItem(req, res) {
     const item = await itemService.addItem(req.body);
     res.status(201).json({
@@ -12,9 +10,7 @@ export async function addItem(req, res) {
     });
 }
 
-// get Items
-// req: options from query
-// res: status, json(success, message, returned data)
+// Retrieve items data
 export async function getItems(req, res) {
     const items = await itemService.getItems(req.query);
 
@@ -25,9 +21,7 @@ export async function getItems(req, res) {
     });
 }
 
-// scan item
-// req: code from body
-// res: status, json(success, message, returned data)
+// Scan item
 export async function scanBarcode(req, res) {
     const item = await itemService.scanBarcode(req.body.barcode);
 
@@ -38,9 +32,7 @@ export async function scanBarcode(req, res) {
     });
 }
 
-// upload photos
-// req: itemId from params, photos from file
-// res: status, json(success, message, returned data)
+// Upload the item's photos
 export async function uploadPhotos(req, res) {
     const data = await itemService.uploadPhotos(req.params.itemId, req.files);
 
@@ -51,8 +43,7 @@ export async function uploadPhotos(req, res) {
     });
 }
 
-// regenerate barcode
-// input: itemId from params
+// Regenerate the item's barcode
 export async function regenerateBarcode(req, res) {
     const barcodePath = await itemService.regenerateBarcode(req.params.itemId);
 
@@ -63,9 +54,7 @@ export async function regenerateBarcode(req, res) {
     });
 }
 
-// delete a photo
-// req: itemId and photoId from params
-// res: status, json(success, message)
+// Delete the item's photo
 export async function deletePhoto(req, res) {
     await itemService.deletePhoto(req.params.photoId);
 
@@ -75,9 +64,7 @@ export async function deletePhoto(req, res) {
     });
 }
 
-// update item
-// req: ItemId from params, data from body
-// res: status, json(success, message, returned data)
+// Update the item's data
 export async function updateItem(req, res) {
     const item = await itemService.updateItem(req.params.itemId, req.body);
 
@@ -88,9 +75,7 @@ export async function updateItem(req, res) {
     });
 }
 
-// delete an item
-// req: itemId from params
-// res: status, json(success, message)
+// Delete the item
 export async function deleteItem(req, res) {
     await itemService.deleteItem(req.params.itemId);
     res.status(200).json({
@@ -99,9 +84,7 @@ export async function deleteItem(req, res) {
     });
 }
 
-// get an item
-// req: itemId from params
-// res: status, json(success, message, returned data)
+// Retrieve the item's data
 export async function getItem(req, res) {
     const item = await itemService.getItem(req.params.itemId);
 
