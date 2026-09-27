@@ -108,7 +108,6 @@ export async function getItems(options = {}) {
 export async function scanBarcode(barcode) {
     const item = await Item.findOne({
         where: { barcode },
-        attributes: ['id', 'name', 'description', 'price', 'barcodePath'],
         include: [
             {
                 model: Photo,
@@ -118,7 +117,17 @@ export async function scanBarcode(barcode) {
     });
     if (!item) throwError('Item not found', 404);
 
-    return item;
+    return {
+        id: item.id,
+        name: item.name,
+        description: item.description,
+        price: item.price,
+        barcodePath: item.barcodePath,
+        photos: item.photos.map((photo) => ({
+            id: photo.id,
+            path: photo.path,
+        })),
+    };
 }
 
 /**
@@ -274,7 +283,6 @@ export async function deleteItem(itemId) {
  */
 export async function getItem(itemId) {
     const item = await Item.findByPk(itemId, {
-        attributes: ['id', 'name', 'description', 'price', 'barcodePath'],
         include: [
             {
                 model: Photo,
@@ -285,7 +293,17 @@ export async function getItem(itemId) {
 
     if (!item) throwError('Item not found', 404);
 
-    return item;
+    return {
+        id: item.id,
+        name: item.name,
+        description: item.description,
+        price: item.price,
+        barcodePath: item.barcodePath,
+        photos: item.photos.map((photo) => ({
+            id: photo.id,
+            path: photo.path,
+        })),
+    };
 }
 
 // ---------- Helpers -------------

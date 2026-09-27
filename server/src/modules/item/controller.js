@@ -21,25 +21,41 @@ export async function getItems(req, res) {
     });
 }
 
-// Scan item
+// Retrieve item by scanning
 export async function scanBarcode(req, res) {
     const item = await itemService.scanBarcode(req.body.barcode);
+
+    const itemBarcodeUrl = `/api/v1/barcodes${item.barcodePath.split('barcodes')[1].replace(/\\/g, '/')}`;
+
+    const itemPhotosWithUrls = item.photos.map((photo) => ({
+        id: photo.id,
+        url: `/api/v1/photos${photo.path.split('photos')[1].replace(/\\/g, '/')}`,
+    }));
 
     res.status(200).json({
         success: true,
         message: 'Item fetched',
-        item,
+        item: {
+            ...item,
+            barcodePath: itemBarcodeUrl,
+            photos: itemPhotosWithUrls,
+        },
     });
 }
 
 // Upload the item's photos
 export async function uploadPhotos(req, res) {
-    const data = await itemService.uploadPhotos(req.params.itemId, req.files);
+    const itemPhotos = await itemService.uploadPhotos(req.params.itemId, req.files);
+
+    const itemPhotosWithUrls = itemPhotos.map((itemPhoto) => ({
+        id: itemPhoto.id,
+        url: `/api/v1/photos${itemPhoto.path.split('photos')[1].replace(/\\/g, '/')}`,
+    }));
 
     res.status(200).json({
         success: true,
         message: 'Photos uploaded',
-        data,
+        itemPhotos: itemPhotosWithUrls,
     });
 }
 
@@ -47,10 +63,12 @@ export async function uploadPhotos(req, res) {
 export async function regenerateBarcode(req, res) {
     const barcodePath = await itemService.regenerateBarcode(req.params.itemId);
 
+    const barcodeUrl = `/api/v1/barcodes${barcodePath.split('barcodes')[1].replace(/\\/g, '/')}`;
+
     res.status(200).json({
         success: true,
         message: 'New barcode generated',
-        barcodePath,
+        barcodeUrl,
     });
 }
 
@@ -88,9 +106,19 @@ export async function deleteItem(req, res) {
 export async function getItem(req, res) {
     const item = await itemService.getItem(req.params.itemId);
 
+    const itemBarcodeUrl = `/api/v1/barcodes${item.barcodePath.split('barcodes')[1].replace(/\\/g, '/')}`;
+    const itemPhotosWithUrls = item.photos.map((photo) => ({
+        id: photo.id,
+        url: `/api/v1/photos${photo.path.split('photos')[1].replace(/\\/g, '/')}`,
+    }));
+
     res.status(200).json({
         success: true,
         message: 'Item fetched',
-        item,
+        item: {
+            ...item,
+            barcodePath: itemBarcodeUrl,
+            photos: itemPhotosWithUrls,
+        },
     });
 }
