@@ -2,11 +2,16 @@ import Sale from './models/sale.js';
 import SaleItem from './models/saleItem.js';
 import throwError from '../../utils/throwError.js';
 import Item from '../item/models/item.js';
+import { Op } from 'sequelize';
 
-// Create sale
-// input: saleData not item added initailly
-// destructure the data
-// return: sale data
+/**
+ * Create a sale
+ *
+ * @param {Object} customer
+ * @param {string} customer.customerName
+ * @param {string} customer.customerPhone
+ * @returns {Promise<Object>} - Created sale data
+ */
 export async function createSale({ customerName, customerPhone }) {
     const sale = await Sale.create({
         customerName,
@@ -21,19 +26,47 @@ export async function createSale({ customerName, customerPhone }) {
     };
 }
 
-// get sales
-// input: options
-// queries: search by customerName, itemName
-//          sort by date (defualt)
-//          pagination
-//
-// return: rows + paginaton data
+/**
+ * Retrieve list of sales
+ *
+ * @param {Object} options - Query paramters
+ * @returns {Promise<Object>} - Paginated list of sales
+ */
+export async function getSales(options = {}) {
+    const { search, page = 1, limit = 10 } = options;
 
-// get Sale
-// input: saleId
-// if sale exist
-// get items if exist
-// return sale data, items data, total
+    const offset = (page - 1) * limit;
+    const where = search
+        ? {
+              customerName: {
+                  [Op.like]: `%${search}%`,
+              },
+          }
+        : undefined;
+
+    const sales = await Sale.findAndCountAll({
+        attributes: ['id', 'customerName', 'customerPhone', 'date'],
+        where,
+        offset,
+        limit,
+        order: [['date', 'DESC']],
+    });
+
+    return {
+        page,
+        limit,
+        totalSales: sales.count,
+        totalPages: Math.ceil(sales.count / limit),
+        sales: sales.rows,
+    };
+}
+
+/**
+ * Retrieve the sale
+ *
+ * @param {string} saleId
+ * @returns {Promise<Object>} - Sale data
+ */
 export async function getSale(saleId) {
     const sale = await Sale.findByPk(saleId, {
         include: [
@@ -63,11 +96,13 @@ export async function getSale(saleId) {
     };
 }
 
-// update Sale
-// input: saleId, data
-// if saleexist
-// onyl update the sale data
-// return: sale data, items data, total
+/**
+ * Update sale
+ *
+ * @param {string} saleId
+ * @param {Object} data - Sale data to be updated
+ * @returns {Promise<Object>} - Updated sale data
+ */
 export async function updateSale(saleId, data) {
     const sale = await Sale.findByPk(saleId);
     if (!sale) throwError('Sale not found', 404);
@@ -86,17 +121,18 @@ export async function updateSale(saleId, data) {
     await sale.update(updatedData);
 
     return {
-        saleId: sale.id,
         customerName: sale.customerName,
         customerPhone: sale.customerPhone,
         saleDate: sale.date,
     };
 }
 
-// delete sale
-// input: saleId
-// if sale exist
-// return: nothing
+/**
+ * Delete the sale
+ *
+ * @param {string} saleId
+ * @returns {Promise<void>}
+ */
 export async function deleteSale(saleId) {
     const sale = await Sale.findByPk(saleId);
     if (!sale) throwError('Sale not found', 404);
@@ -104,14 +140,13 @@ export async function deleteSale(saleId) {
     await sale.destroy();
 }
 
-// add Item to sale
-// input: saleId, items
-// if sale exist
-// if items in that sale eixst
-// if item already sold
-// Create the saleItem
-// return:  added item
-
+/**
+ * Add item to the sale
+ *
+ * @param {string} saleId
+ * @param {string} itemId
+ * @returns {Promise<Object>} - Added item data
+ */
 export async function addItemToSale(saleId, itemId) {
     if (!itemId) {
         throwError('Item ID is required', 400);
@@ -136,10 +171,10 @@ export async function addItemToSale(saleId, itemId) {
 
     return {
         itemId: saleItem.itemId,
-        saleId: saleItem.saleId,
     };
 }
 
+// Helper to find if item is sold
 async function isItemSold(itemId) {
     const saleItem = await SaleItem.findOne({
         where: {
@@ -152,12 +187,13 @@ async function isItemSold(itemId) {
     }
 }
 
-// delete Item of sale
-// input: saleId, ItemId
-// if sale exist
-// if item exist
-// delete sale item
-// return: nothing
+/**
+ * Delete item of the sale
+ *
+ * @param {string} saleId
+ * @param {string} itemId
+ * @returns {Promise<void>}
+ */
 export async function deleteItemOfSale(saleId, itemId) {
     const saleItem = await SaleItem.findOne({
         where: {

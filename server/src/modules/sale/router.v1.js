@@ -4,7 +4,7 @@ import express from 'express';
 const router = express.Router();
 
 router.post('/', saleController.createSale);
-//router.get("/");
+router.get('/', saleController.getSales);
 router.get('/:saleId', saleController.getSale);
 router.patch('/:saleId', saleController.updateSale);
 router.delete('/:saleId', saleController.deleteSale);
