@@ -2,6 +2,7 @@ import express from 'express';
 import hpp from 'hpp';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
+import compression from 'compression';
 import v1Router from '../src/routers/v1/index.js';
 import globalErrorHandler from './middleware/globalErrorHandler.js';
 import path from 'node:path';
@@ -12,6 +13,7 @@ app.use(express.json());
 app.use(hpp());
 app.use(helmet());
 app.use(cookieParser());
+app.use(compression());
 
 app.use('/api/v1', v1Router);
 app.use('/api/v1/photos', express.static(path.join(process.cwd(), 'storage/photos')));
