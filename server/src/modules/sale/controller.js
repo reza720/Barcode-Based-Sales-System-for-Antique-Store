@@ -4,7 +4,7 @@ import * as saleService from './service.js';
 export async function createSale(req, res) {
     const sale = await saleService.createSale(req.body);
 
-    res.status(201).json({
+    res.status(201).location(`/api/v1/sales/${sale.saleId}`).json({
         success: true,
         message: 'Sale created',
         sale,
@@ -58,7 +58,7 @@ export async function deleteSale(req, res) {
 export async function addItemToSale(req, res) {
     const newItem = await saleService.addItemToSale(req.params.saleId, req.params.itemId);
 
-    res.status(200).json({
+    res.status(201).json({
         success: true,
         message: 'Item added',
         newItem,

@@ -104,7 +104,6 @@ export async function getItems(options = {}) {
  * @param {string} barcode - Barcode value
  * @returns {Promise<Object>} - Item data
  */
-
 export async function scanBarcode(barcode) {
     const item = await Item.findOne({
         where: { barcode },
@@ -123,7 +122,7 @@ export async function scanBarcode(barcode) {
         description: item.description,
         price: item.price,
         barcodePath: item.barcodePath,
-        photos: item.photos.map((photo) => ({
+        photos: (item.Photos || []).map((photo) => ({
             id: photo.id,
             path: photo.path,
         })),
@@ -193,9 +192,7 @@ export async function regenerateBarcode(itemId) {
 
         if (oldFilepath) await deleteFile(oldFilepath);
 
-        return {
-            barcodePath: item.barcodePath,
-        };
+        return item.barcodePath;
     } catch (err) {
         if (filepath) {
             await deleteFile(filepath);
@@ -299,7 +296,7 @@ export async function getItem(itemId) {
         description: item.description,
         price: item.price,
         barcodePath: item.barcodePath,
-        photos: item.photos.map((photo) => ({
+        photos: (item.Photos || []).map((photo) => ({
             id: photo.id,
             path: photo.path,
         })),

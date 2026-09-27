@@ -3,11 +3,19 @@ import * as itemService from './service.js';
 // Add item
 export async function addItem(req, res) {
     const item = await itemService.addItem(req.body);
-    res.status(201).json({
-        success: true,
-        message: 'Item added',
-        item,
-    });
+
+    const itemBarcodeUrl = `/api/v1/barcodes${item.barcodePath.split('barcodes')[1].replace(/\\/g, '/')}`;
+
+    res.status(201)
+        .location(`/api/v1/items/${item.id}`)
+        .json({
+            success: true,
+            message: 'Item added',
+            item: {
+                ...item,
+                barcodePath: itemBarcodeUrl,
+            },
+        });
 }
 
 // Retrieve items data
@@ -27,10 +35,12 @@ export async function scanBarcode(req, res) {
 
     const itemBarcodeUrl = `/api/v1/barcodes${item.barcodePath.split('barcodes')[1].replace(/\\/g, '/')}`;
 
-    const itemPhotosWithUrls = item.photos.map((photo) => ({
-        id: photo.id,
-        url: `/api/v1/photos${photo.path.split('photos')[1].replace(/\\/g, '/')}`,
-    }));
+    const itemPhotosWithUrls = item.photos?.length
+        ? item.photos.map((photo) => ({
+              id: photo.id,
+              url: `/api/v1/photos${photo.path.split('photos')[1].replace(/\\/g, '/')}`,
+          }))
+        : [];
 
     res.status(200).json({
         success: true,
@@ -47,7 +57,7 @@ export async function scanBarcode(req, res) {
 export async function uploadPhotos(req, res) {
     const itemPhotos = await itemService.uploadPhotos(req.params.itemId, req.files);
 
-    const itemPhotosWithUrls = itemPhotos.map((itemPhoto) => ({
+    const itemPhotosWithUrls = itemPhotos.photos.map((itemPhoto) => ({
         id: itemPhoto.id,
         url: `/api/v1/photos${itemPhoto.path.split('photos')[1].replace(/\\/g, '/')}`,
     }));
@@ -96,6 +106,7 @@ export async function updateItem(req, res) {
 // Delete the item
 export async function deleteItem(req, res) {
     await itemService.deleteItem(req.params.itemId);
+
     res.status(200).json({
         success: true,
         message: 'Item deleted',
@@ -107,10 +118,12 @@ export async function getItem(req, res) {
     const item = await itemService.getItem(req.params.itemId);
 
     const itemBarcodeUrl = `/api/v1/barcodes${item.barcodePath.split('barcodes')[1].replace(/\\/g, '/')}`;
-    const itemPhotosWithUrls = item.photos.map((photo) => ({
-        id: photo.id,
-        url: `/api/v1/photos${photo.path.split('photos')[1].replace(/\\/g, '/')}`,
-    }));
+    const itemPhotosWithUrls = item.photos?.length
+        ? item.photos.map((photo) => ({
+              id: photo.id,
+              url: `/api/v1/photos${photo.path.split('photos')[1].replace(/\\/g, '/')}`,
+          }))
+        : [];
 
     res.status(200).json({
         success: true,

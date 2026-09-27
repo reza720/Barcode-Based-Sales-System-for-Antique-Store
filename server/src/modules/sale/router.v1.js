@@ -9,7 +9,7 @@ router.get('/:saleId', saleController.getSale);
 router.patch('/:saleId', saleController.updateSale);
 router.delete('/:saleId', saleController.deleteSale);
 
-router.post('/:saleId/itmes/:itemId', saleController.addItemToSale);
+router.post('/:saleId/items/:itemId', saleController.addItemToSale);
 router.delete('/:saleId/items/:itemId', saleController.deleteItemOfSale);
 
 export default router;

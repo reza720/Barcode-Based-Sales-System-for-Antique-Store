@@ -153,16 +153,18 @@ export async function addItemToSale(saleId, itemId) {
     }
 
     const sale = await Sale.findByPk(saleId);
+
     if (!sale) {
         throwError('Sale not found', 404);
     }
 
     const item = await Item.findByPk(itemId);
+
     if (!item) {
         throwError('Item not found', 404);
     }
 
-    await isItemSold(itemId);
+    await ensureItemNotSold(itemId);
 
     const saleItem = await SaleItem.create({
         itemId,
@@ -174,12 +176,10 @@ export async function addItemToSale(saleId, itemId) {
     };
 }
 
-// Helper to find if item is sold
-async function isItemSold(itemId) {
+// Helper
+async function ensureItemNotSold(itemId) {
     const saleItem = await SaleItem.findOne({
-        where: {
-            itemId,
-        },
+        where: { itemId },
     });
 
     if (saleItem) {
